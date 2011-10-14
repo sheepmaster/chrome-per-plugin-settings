@@ -1,0 +1,10 @@
+{
+  "name" : "Content settings",
+  "version" : "0.1",
+  "description" : "Shows the content settings for the current site.",
+  "options_page": "options.html",
+  "permissions": [
+    "contentSettings",
+    "chrome://resources"
+  ]
+}

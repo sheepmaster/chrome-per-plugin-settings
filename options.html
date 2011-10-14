@@ -1,0 +1,25 @@
+<html>
+<head>
+<script src="jstemplate/util.js" type="text/javascript"></script>
+<script src="jstemplate/jsevalcontext.js" type="text/javascript"></script>
+<script src="jstemplate/jstemplate.js" type="text/javascript"></script>
+<script src="plugin_settings.js" type="text/javascript"></script>
+</head>
+<body onload="init()">
+<div>Plug-ins:</div>
+<ul>
+<li jsselect="plugins">
+  <div jscontent="description"></div>
+  <div jsvalues=".id:'plugin-'+id">
+    <ul jsdisplay="rules" jsselect="rules">
+      <li>
+        primary pattern: <span jscontent="primaryPattern"></span>
+        secondary pattern: <span jscontent="secondaryPattern"></span>
+        setting: <span jscontent="setting"></span>
+      </li>
+    </ul>
+  </div>
+</li>
+</ul>
+</body>
+</html>
