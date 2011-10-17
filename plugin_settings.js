@@ -21,53 +21,49 @@ cr.define('pluginSettings', function() {
       this.dispatchEvent(e);
     },
 
+    /**
+     * Clears all content settings, and recreates them from local storage.
+     */
     recreateRules_: function(callback) {
-      var length = window.localStorage.length;
-      var count = length;
-      var rules = [];
-      for (var i = 0; i < length; i++) {
-        var key = window.localStorage.key(i);
-        var keyArray = JSON.parse(key);
-        chrome.contentSettings.plugins.set({
-            'primaryPattern': keyArray[1],
-            'resourceIdentifier': { 'id': keyArray[0] },
-            'setting': window.localStorage.getItem(key),
-        }, function() {
-          if (chrome.extension.lastError)
-            console.error(chrome.extension.lastError.message);
-          count--;
-          if (count == 0)
-            callback();
-        });
-      }
+      chrome.contentSettings.plugins.clear({}, function() {
+        var length = window.localStorage.length;
+        var count = length;
+        for (var i = 0; i < length; i++) {
+          var key = window.localStorage.key(i);
+          var keyArray = JSON.parse(key);
+          chrome.contentSettings.plugins.set({
+              'primaryPattern': keyArray[1],
+              'resourceIdentifier': { 'id': keyArray[0] },
+              'setting': window.localStorage.getItem(key),
+          }, function() {
+            count--;
+            if (count == 0)
+              callback();
+          });
+        }
+      });
     },
 
     set: function(id, primaryPattern, setting) {
+      var settings = this;
       chrome.contentSettings.plugins.set({
           'primaryPattern': primaryPattern,
           'resourceIdentifier': { 'id': id },
           'setting': setting,
       }, function() {
-        if (chrome.extension.lastError) {
-          console.error(chrome.extension.lastError.message);
-        } else {
+        if (!chrome.extension.lastError) {
           window.localStorage.setItem(JSON.stringify([id, primaryPattern]),
                                       setting);
-          this.dispatchChangeEvent_(id);
+          settings.dispatchChangeEvent_(id);
         }
       });
     },
 
     clear: function(id, primaryPattern) {
       window.localStorage.removeItem(JSON.stringify([id, primaryPattern]));
-      // Clear all content settings, and recreate them from local storage.
-      var rules = this.getAll(id);
-      chrome.contentSettings.plugins.clear({
-          'primaryPattern': primaryPattern
-      }, function() {
-        this.recreateRules_(function() {
-          this.dispatchChangeEvent_(id);
-        });
+      var settings = this;
+      this.recreateRules_(function() {
+        settings.dispatchChangeEvent_(id);
       });
       // chrome.contentSettings.plugins.set({
       //   'primaryPattern': primaryPattern,
