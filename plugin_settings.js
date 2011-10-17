@@ -79,7 +79,7 @@ cr.define('pluginSettings', function() {
   }
   
   RuleListItem.prototype = {
-    __proto__: InlineEditableItem.prototype,
+    __proto__: InlineEditableItem.prototype,  // ???
     
     /**
      * Called when an element is decorated as a list item.
@@ -329,7 +329,7 @@ cr.define('pluginSettings', function() {
 
       var args = [0, deleteCount];
       args.push.apply(args, entries);
-      this.dataModel.splice.apply(this.dataModel, args);
+      this.dataModel.splice.apply(this.dataModel, args);  // ???
     },
 
     /**
