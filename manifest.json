@@ -4,7 +4,6 @@
   "description" : "Shows the content settings for the current site.",
   "options_page": "options.html",
   "permissions": [
-    "contentSettings",
-    "chrome://resources/"
+    "contentSettings"
   ]
 }
