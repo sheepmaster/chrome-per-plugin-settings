@@ -3,6 +3,106 @@ var templateData = {
   'blockRule': 'Block'
 }
 
+cr.define('pluginSettings', function() {
+  const EventTarget = cr.EventTarget;
+  const Event = cr.Event;
+
+  function Settings() {
+  }
+
+  cr.addSingletonGetter(Settings);
+  
+  Settings.prototype = {
+    __proto__: cr.EventTarget.prototype,
+
+    dispatchChangeEvent_: function(plugin) {
+      var e = new Event('change');
+      e.plugin = plugin;
+      this.dispatchEvent(e);
+    },
+
+    recreateRules_: function(callback) {
+      var length = window.localStorage.length;
+      var count = length;
+      var rules = [];
+      for (var i = 0; i < length; i++) {
+        var key = window.localStorage.key(i);
+        var keyArray = JSON.parse(key);
+        chrome.contentSettings.plugins.set({
+            'primaryPattern': keyArray[1],
+            'resourceIdentifier': { 'id': keyArray[0] },
+            'setting': window.localStorage.getItem(key),
+        }, function() {
+          if (chrome.extension.lastError)
+            console.error(chrome.extension.lastError.message);
+          count--;
+          if (count == 0)
+            callback();
+        });
+      }
+    },
+
+    set: function(id, primaryPattern, setting) {
+      chrome.contentSettings.plugins.set({
+          'primaryPattern': primaryPattern,
+          'resourceIdentifier': { 'id': id },
+          'setting': setting,
+      }, function() {
+        if (chrome.extension.lastError) {
+          console.error(chrome.extension.lastError.message);
+        } else {
+          window.localStorage.setItem(JSON.stringify([id, primaryPattern]),
+                                      setting);
+          this.dispatchChangeEvent_(id);
+        }
+      });
+    },
+
+    clear: function(id, primaryPattern) {
+      window.localStorage.removeItem(JSON.stringify([id, primaryPattern]));
+      // Clear all content settings, and recreate them from local storage.
+      var rules = this.getAll(id);
+      chrome.contentSettings.plugins.clear({
+          'primaryPattern': primaryPattern
+      }, function() {
+        this.recreateRules_(function() {
+          this.dispatchChangeEvent_(id);
+        });
+      });
+      // chrome.contentSettings.plugins.set({
+      //   'primaryPattern': primaryPattern,
+      //   'secondaryPattern': secondaryPattern,
+      //   'resourceIdentifier': { 'id': id },
+      //   'setting': null,
+      // }, checkError);
+    },
+
+    get: function(id, primaryPattern) {
+      return window.localStorage.getItem(JSON.stringify([id, primaryPattern]));
+    },
+
+    getAll: function(id) {
+      var length = window.localStorage.length;
+      var rules = [];
+      for (var i = 0; i < length; i++) {
+        var key = window.localStorage.key(i);
+        var keyArray = JSON.parse(key);
+        if (keyArray[0] == id) {
+          rules.push({
+            'primaryPattern': keyArray[1],
+            'setting': window.localStorage.getItem(key),
+          });
+        }
+      }
+      return rules;
+    }
+  };
+  
+  return {
+    Settings: Settings,
+  }
+});
+
 function mockGetContentSettingRules(id) {
   if (id == "adobe-flash-player") {
     return [{
@@ -16,53 +116,7 @@ function mockGetContentSettingRules(id) {
 }
 
 
-function setContentSetting(id, primaryPattern, setting) {
-  // chrome.contentSettings.plugins.set({
-  //     'primaryPattern': primaryPattern,
-  //     'secondaryPattern': secondaryPattern,
-  //     'resourceIdentifier': { 'id': id },
-  //     'setting': setting,
-  // }, function() {
-  //   if (chrome.extension.lastError) {
-  //     console.error(chrome.extension.lastError.message);
-  //   } else {
-    window.localStorage.setItem(JSON.stringify([id, primaryPattern]), setting);
-  //   }
-  // });
-}
-
-function clearContentSetting(id, primaryPattern) {
-  window.localStorage.removeItem(JSON.stringify([id, primaryPattern]));
-  // chrome.contentSettings.plugins.set({
-  //   'primaryPattern': primaryPattern,
-  //   'secondaryPattern': secondaryPattern,
-  //   'resourceIdentifier': { 'id': id },
-  //   'setting': null,
-  // }, checkError);
-}
-
-function getContentSetting(id, primaryPattern) {
-  return window.localStorage.getItem(JSON.stringify([id, primaryPattern]));
-}
-
-function getContentSettingRules(id) {
-  var length = window.localStorage.length;
-  var rules = [];
-  for (var i = 0; i < length; i++) {
-    var key = window.localStorage.key(i);
-    var keyArray = JSON.parse(key);
-    if (key[0] == id) {
-      rules.push({
-        'primaryPattern': key[1],
-        'secondaryPattern': key[2],
-        'setting': window.localStorage.getItem(key),
-      });
-    }
-  }
-  return rules;
-}
-
-cr.define('pluginSettings', function() {
+cr.define('pluginSettings.ui', function() {
   const InlineEditableItemList = options.InlineEditableItemList;
   const InlineEditableItem = options.InlineEditableItem;
   const ArrayDataModel = cr.ui.ArrayDataModel;
@@ -72,6 +126,7 @@ cr.define('pluginSettings', function() {
     
     el.dataItem = rule;
     el.plugin = plugin;
+    el.settings = pluginSettings.Settings.getInstance();
     el.__proto__ = RuleListItem.prototype;
     el.decorate();
 
@@ -231,18 +286,19 @@ cr.define('pluginSettings', function() {
       this.setting = newSetting;
 
       if (oldPattern != newPattern) {
-        clearContentSetting(this.plugin, oldPattern);
+        this.settings.clear(this.plugin, oldPattern);
       }
 
-      setContentSetting(this.plugin, newPattern, newSetting);
+      this.settings.set(this.plugin, newPattern, newSetting);
     }
   };
   
   function AddRuleListItem(plugin) {
     var el = cr.doc.createElement('div');
-    el.dataItem = [];
+    el.dataItem = {};
+    el.settings = pluginSettings.Settings.getInstance();
     el.plugin = plugin;
-    el.__proto__ = RuleListItem.prototype;
+    el.__proto__ = AddRuleListItem.prototype;
     el.decorate();
 
     return el;
@@ -252,7 +308,7 @@ cr.define('pluginSettings', function() {
     __proto__: RuleListItem.prototype,
 
     decorate: function() {
-      AddRuleListItem.prototype.decorate.call(this);
+      RuleListItem.prototype.decorate.call(this);
       
       this.setting = 'allow';
     },
@@ -277,7 +333,7 @@ cr.define('pluginSettings', function() {
      */
     finishEdit: function(newPattern, newSetting) {
       this.resetInput();
-      setContentSetting(this.plugin, newPattern, newSetting);
+      this.settings.set(this.plugin, newPattern, newSetting);
     },
   };
   
@@ -322,9 +378,9 @@ cr.define('pluginSettings', function() {
     /**
      * Sets the exceptions in the js model.
      * @param {Object} entries A list of dictionaries of values, each dictionary
-     *     represents an exception.
+     *     represents a rule.
      */
-    setRules: function(entries) {
+    setRules_: function(entries) {
       var deleteCount = this.dataModel.length - 1;
 
       var args = [0, deleteCount];
@@ -332,11 +388,22 @@ cr.define('pluginSettings', function() {
       this.dataModel.splice.apply(this.dataModel, args);  // ???
     },
 
+    handleSettingsChange_: function(e) {
+      this.setRules_(this.settings.getAll(e.plugin));
+    },
+
+    setPluginSettings: function(settings) {
+      this.settings = settings;
+      this.setRules_(settings.getAll(this.plugin));
+      settings.addEventListener('change',
+                                this.handleSettingsChange_.bind(this));
+    },
+
     /**
      * Removes all exceptions from the js model.
      */
     reset: function() {
-      // The null creates the Add New Exception row.
+      // The null creates the Add New Rule row.
       this.dataModel = new ArrayDataModel([null]);
     },
 
@@ -348,7 +415,7 @@ cr.define('pluginSettings', function() {
 
       var dataItem = listItem.dataItem;
 
-      clearContentSetting(listItem.plugin, dataItem['primaryPattern']);
+      this.settings.clear(listItem.plugin, dataItem['primaryPattern']);
     },
   };
   
@@ -369,14 +436,14 @@ function processPlugins(r) {
 }
 
 function init() {
-  chrome.contentSettings.plugins.getResourceIdentifiers(processPlugins);
+  // chrome.contentSettings.plugins.getResourceIdentifiers(processPlugins);
+
+  var settings = pluginSettings.Settings.getInstance();
 
   var ruleLists = document.querySelectorAll('list');
   for (var i = 0; i < ruleLists.length; i++) {
     var list = ruleLists[i];
-    var plugin = list.getAttribute('plugin');
-    pluginSettings.RuleList.decorate(list);
-    list.setRules(mockGetContentSettingRules(plugin));
+    pluginSettings.ui.RuleList.decorate(list);
+    list.setPluginSettings(settings);
   }
-
 }
