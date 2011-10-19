@@ -438,11 +438,8 @@ list[inlineeditable] input {
   width: 100%;
 }
 
-list > :not([editing]) [displaymode="edit"] {
-  display: none;
-}
-
-list > [editing] [displaymode="static"] {
+list[inlineeditable] > :not([editing]) [displaymode="edit"],
+list[inlineeditable] > [editing] [displaymode="static"] {
   display: none;
 }
 

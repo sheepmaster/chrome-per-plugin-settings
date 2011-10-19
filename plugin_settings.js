@@ -427,22 +427,15 @@ cr.define('pluginSettings.ui', function() {
 
 function processPlugins(r) {
   if (r) {
-    console.log(JSON.stringify(r));
-    
+    // console.log(JSON.stringify(r));
+    var pluginList = document.getElementById('plugin-list');
+    pluginSettings.ui.PluginList.decorate(pluginList);
+    pluginList.dataModel = new cr.ui.ArrayDataModel(r);
   } else {
     console.log("Please update to a more recent version of Chrome.");
   }
 }
 
-function init() {
-  // chrome.contentSettings.plugins.getResourceIdentifiers(processPlugins);
-
-  var settings = pluginSettings.Settings.getInstance();
-
-  var ruleLists = document.querySelectorAll('list');
-  for (var i = 0; i < ruleLists.length; i++) {
-    var list = ruleLists[i];
-    pluginSettings.ui.RuleList.decorate(list);
-    list.setPluginSettings(settings);
-  }
-}
+document.addEventListener('DOMContentLoaded', function() {
+  chrome.contentSettings.plugins.getResourceIdentifiers(processPlugins);
+});
