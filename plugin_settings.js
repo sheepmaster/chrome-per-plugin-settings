@@ -438,4 +438,14 @@ function processPlugins(r) {
 
 document.addEventListener('DOMContentLoaded', function() {
   chrome.contentSettings.plugins.getResourceIdentifiers(processPlugins);
+
+  var settings = pluginSettings.Settings.getInstance();
+  var ruleLists = document.querySelectorAll('list');
+  for (var i = 0; i < ruleLists.length; i++) {
+    var list = ruleLists[i];
+    if (list.hasAttribute('plugin')) {
+      pluginSettings.ui.RuleList.decorate(list);
+      list.setPluginSettings(list.getAttribute('plugin'), settings);
+    }
+  }
 });
