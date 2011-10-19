@@ -6,7 +6,6 @@ found in the LICENSE file.
 
 .plugin-name {
   display: inline-block;
-  width: 11em;
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: bold;
@@ -22,11 +21,10 @@ found in the LICENSE file.
 }
 
 .plugin-details {
-  /*-webkit-transition: height .5s ease-in-out;*/
+  -webkit-transition: height .5s ease-in-out;
   background: #f5f8f8;
   border: 1px solid #b2b2b2;
   border-radius: 5px;
-  -webkit-margin-start: 11em;
   padding: 5px;
   height: 0;
   opacity: 0;
@@ -73,4 +71,18 @@ li.plugin-show-details {
 
 .plugin-mime-types tr.header > td {
   border-bottom: 1px solid;
+}
+
+.column-headers {
+  -webkit-margin-start: 17px;
+  display: -webkit-box;
+  margin-top: 17px;
+}
+
+.pattern-column-header {
+  -webkit-box-flex: 1;
+}
+
+.setting-column-header {
+  width: 145px;
 }

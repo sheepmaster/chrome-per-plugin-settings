@@ -7,6 +7,12 @@ cr.define('pluginSettings.ui', function() {
   const ListItem = cr.ui.ListItem;
   const ListSingleSelectionModel = cr.ui.ListSingleSelectionModel;
 
+  // XXX
+  var templateData = {
+    patternColumnHeader: 'Hostname Pattern',
+    settingColumnHeader: 'Behavior'
+  };
+
   /**
    * Returns the item's height, like offsetHeight but such that it works better
    * when the page is zoomed. See the similar calculation in @{code cr.ui.List}.
@@ -58,9 +64,21 @@ cr.define('pluginSettings.ui', function() {
       this.detailsElement_ = this.ownerDocument.createElement('div');
       this.detailsElement_.className = 'plugin-details hidden';
 
+      var columnHeadersEl = this.ownerDocument.createElement('div');
+      columnHeadersEl.className = 'column-headers';
+      var patternColumnEl = this.ownerDocument.createElement('div');
+      patternColumnEl.textContent = templateData.patternColumnHeader;
+      patternColumnEl.className = 'pattern-column-header';
+      var settingColumnEl = this.ownerDocument.createElement('div');
+      settingColumnEl.textContent = templateData.settingColumnHeader;
+      settingColumnEl.className = 'setting-column-header';
+      columnHeadersEl.appendChild(patternColumnEl);
+      columnHeadersEl.appendChild(settingColumnEl);
+      this.detailsElement_.appendChild(columnHeadersEl);
+
       var rulesEl = this.ownerDocument.createElement('list');
       pluginSettings.ui.RuleList.decorate(rulesEl);
-      rulesEl.setPluginSettings(info.id, pluginSettings.Settings.getInstance());
+      rulesEl.setPluginSettings(new pluginSettings.Settings(info.id));
       this.detailsElement_.appendChild(rulesEl);
 
       this.contentElement_.appendChild(nameEl);

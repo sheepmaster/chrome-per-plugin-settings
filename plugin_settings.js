@@ -11,17 +11,15 @@ cr.define('pluginSettings', function() {
   const EventTarget = cr.EventTarget;
   const Event = cr.Event;
 
-  function Settings() {
+  function Settings(plugin) {
+    this.plugin_ = plugin;
   }
 
-  cr.addSingletonGetter(Settings);
-  
   Settings.prototype = {
     __proto__: cr.EventTarget.prototype,
 
-    dispatchChangeEvent_: function(plugin) {
+    dispatchChangeEvent_: function() {
       var e = new Event('change');
-      e.plugin = plugin;
       this.dispatchEvent(e);
     },
 
@@ -48,26 +46,28 @@ cr.define('pluginSettings', function() {
       });
     },
 
-    set: function(id, primaryPattern, setting) {
+    set: function(primaryPattern, setting) {
       var settings = this;
+      var plugin = this.plugin_;
       chrome.contentSettings.plugins.set({
           'primaryPattern': primaryPattern,
-          'resourceIdentifier': { 'id': id },
+          'resourceIdentifier': { 'id': plugin },
           'setting': setting,
       }, function() {
         if (!chrome.extension.lastError) {
-          window.localStorage.setItem(JSON.stringify([id, primaryPattern]),
+          window.localStorage.setItem(JSON.stringify([plugin, primaryPattern]),
                                       setting);
-          settings.dispatchChangeEvent_(id);
+          cr.dispatchSimpleEvent(settings, 'change');
         }
       });
     },
 
-    clear: function(id, primaryPattern) {
-      window.localStorage.removeItem(JSON.stringify([id, primaryPattern]));
+    clear: function(primaryPattern) {
+      window.localStorage.removeItem(
+          JSON.stringify([this.plugin_, primaryPattern]));
       var settings = this;
       this.recreateRules_(function() {
-        settings.dispatchChangeEvent_(id);
+        settings.dispatchChangeEvent_();
       });
       // chrome.contentSettings.plugins.set({
       //   'primaryPattern': primaryPattern,
@@ -77,17 +77,18 @@ cr.define('pluginSettings', function() {
       // }, checkError);
     },
 
-    get: function(id, primaryPattern) {
-      return window.localStorage.getItem(JSON.stringify([id, primaryPattern]));
+    get: function(primaryPattern) {
+      return window.localStorage.getItem(
+            JSON.stringify([this.plugin_, primaryPattern]));
     },
 
-    getAll: function(id) {
+    getAll: function() {
       var length = window.localStorage.length;
       var rules = [];
       for (var i = 0; i < length; i++) {
         var key = window.localStorage.key(i);
         var keyArray = JSON.parse(key);
-        if (keyArray[0] == id) {
+        if (keyArray[0] == this.plugin_) {
           rules.push({
             'primaryPattern': keyArray[1],
             'setting': window.localStorage.getItem(key),
@@ -97,23 +98,11 @@ cr.define('pluginSettings', function() {
       return rules;
     }
   };
-  
+
   return {
     Settings: Settings,
   }
 });
-
-function mockGetContentSettingRules(id) {
-  if (id == "adobe-flash-player") {
-    return [{
-        'primaryPattern': '*.example.com/*',
-        'secondaryPattern': '*',
-        'setting': 'allow',
-    }];
-  } else {
-    return [];
-  }
-}
 
 
 cr.define('pluginSettings.ui', function() {
@@ -125,8 +114,7 @@ cr.define('pluginSettings.ui', function() {
     var el = cr.doc.createElement('div');
 
     el.dataItem = rule;
-    el.list = list;
-    el.settings = pluginSettings.Settings.getInstance();
+    el.list_ = list;
     el.__proto__ = RuleListItem.prototype;
     el.decorate();
 
@@ -286,17 +274,16 @@ cr.define('pluginSettings.ui', function() {
       this.setting = newSetting;
 
       if (oldPattern != newPattern) {
-        this.settings.clear(this.list.plugin, oldPattern);
+        this.list_.settings.clear(oldPattern);
       }
 
-      this.settings.set(this.list.plugin, newPattern, newSetting);
+      this.list_.settings.set(newPattern, newSetting);
     }
   };
   
   function AddRuleListItem(list) {
     var el = cr.doc.createElement('div');
     el.dataItem = {};
-    el.settings = pluginSettings.Settings.getInstance();
     el.list = list;
     el.__proto__ = AddRuleListItem.prototype;
     el.decorate();
@@ -333,7 +320,7 @@ cr.define('pluginSettings.ui', function() {
      */
     finishEdit: function(newPattern, newSetting) {
       this.resetInput();
-      this.settings.set(this.list.plugin, newPattern, newSetting);
+      this.list.settings.set(newPattern, newSetting);
     },
   };
   
@@ -387,13 +374,12 @@ cr.define('pluginSettings.ui', function() {
     },
 
     handleSettingsChange_: function(e) {
-      this.setRules_(this.settings.getAll(e.plugin));
+      this.setRules_(this.settings.getAll());
     },
 
-    setPluginSettings: function(plugin, settings) {
-      this.plugin = plugin;
+    setPluginSettings: function(settings) {
       this.settings = settings;
-      this.setRules_(settings.getAll(plugin));
+      this.setRules_(settings.getAll());
       settings.addEventListener('change',
                                 this.handleSettingsChange_.bind(this));
     },
@@ -414,7 +400,7 @@ cr.define('pluginSettings.ui', function() {
 
       var dataItem = listItem.dataItem;
 
-      this.settings.clear(listItem.plugin, dataItem['primaryPattern']);
+      this.settings.clear(dataItem['primaryPattern']);
     },
   };
   
