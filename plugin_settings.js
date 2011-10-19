@@ -121,11 +121,11 @@ cr.define('pluginSettings.ui', function() {
   const InlineEditableItem = options.InlineEditableItem;
   const ArrayDataModel = cr.ui.ArrayDataModel;
 
-  function RuleListItem(plugin, rule) {
+  function RuleListItem(list, rule) {
     var el = cr.doc.createElement('div');
-    
+
     el.dataItem = rule;
-    el.plugin = plugin;
+    el.list = list;
     el.settings = pluginSettings.Settings.getInstance();
     el.__proto__ = RuleListItem.prototype;
     el.decorate();
@@ -286,18 +286,18 @@ cr.define('pluginSettings.ui', function() {
       this.setting = newSetting;
 
       if (oldPattern != newPattern) {
-        this.settings.clear(this.plugin, oldPattern);
+        this.settings.clear(this.list.plugin, oldPattern);
       }
 
-      this.settings.set(this.plugin, newPattern, newSetting);
+      this.settings.set(this.list.plugin, newPattern, newSetting);
     }
   };
   
-  function AddRuleListItem(plugin) {
+  function AddRuleListItem(list) {
     var el = cr.doc.createElement('div');
     el.dataItem = {};
     el.settings = pluginSettings.Settings.getInstance();
-    el.plugin = plugin;
+    el.list = list;
     el.__proto__ = AddRuleListItem.prototype;
     el.decorate();
 
@@ -333,7 +333,7 @@ cr.define('pluginSettings.ui', function() {
      */
     finishEdit: function(newPattern, newSetting) {
       this.resetInput();
-      this.settings.set(this.plugin, newPattern, newSetting);
+      this.settings.set(this.list.plugin, newPattern, newSetting);
     },
   };
   
@@ -355,8 +355,6 @@ cr.define('pluginSettings.ui', function() {
 
       this.classList.add('settings-list');
 
-      this.plugin = this.getAttribute('plugin');
-
       this.autoExpands = true;
       this.reset();
     },
@@ -367,16 +365,16 @@ cr.define('pluginSettings.ui', function() {
      */
     createItem: function(entry) {
       if (entry) {
-        return new RuleListItem(this.plugin, entry);
+        return new RuleListItem(this, entry);
       } else {
-        var addRuleItem = new AddRuleListItem(this.plugin);
+        var addRuleItem = new AddRuleListItem(this);
         addRuleItem.deletable = false;
         return addRuleItem;
       }
     },
 
     /**
-     * Sets the exceptions in the js model.
+     * Sets the rules in the js model.
      * @param {Object} entries A list of dictionaries of values, each dictionary
      *     represents a rule.
      */
@@ -392,15 +390,16 @@ cr.define('pluginSettings.ui', function() {
       this.setRules_(this.settings.getAll(e.plugin));
     },
 
-    setPluginSettings: function(settings) {
+    setPluginSettings: function(plugin, settings) {
+      this.plugin = plugin;
       this.settings = settings;
-      this.setRules_(settings.getAll(this.plugin));
+      this.setRules_(settings.getAll(plugin));
       settings.addEventListener('change',
                                 this.handleSettingsChange_.bind(this));
     },
 
     /**
-     * Removes all exceptions from the js model.
+     * Removes all rules from the js model.
      */
     reset: function() {
       // The null creates the Add New Rule row.

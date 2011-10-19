@@ -1,0 +1,76 @@
+/*
+Copyright (c) 2010 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+*/
+
+.plugin-name {
+  display: inline-block;
+  width: 11em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+}
+
+.plugin-description {
+  display: inline-block;
+  -webkit-padding-start: 7px;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 95%;
+}
+
+.plugin-details {
+  /*-webkit-transition: height .5s ease-in-out;*/
+  background: #f5f8f8;
+  border: 1px solid #b2b2b2;
+  border-radius: 5px;
+  -webkit-margin-start: 11em;
+  padding: 5px;
+  height: 0;
+  opacity: 0;
+}
+
+.plugin-measure-details .plugin-details {
+  /*-webkit-transition: none;*/
+  height: auto;
+  visibility: hidden;
+}
+
+li.plugin-show-details {
+  height: auto;
+}
+
+.plugin-show-details .plugin-description {
+  height: auto;
+}
+
+.plugin-show-details .plugin-details {
+  opacity: 1;
+  height: auto;
+}
+
+.plugin-details-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.plugin-details-table-label {
+  width: 10em;
+  white-space: pre;
+  vertical-align: top;
+}
+
+.plugin-details-table-value {
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.plugin-mime-types {
+  font-size: 95%;
+}
+
+.plugin-mime-types tr.header > td {
+  border-bottom: 1px solid;
+}

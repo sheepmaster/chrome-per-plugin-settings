@@ -42,9 +42,6 @@ cr.define('pluginSettings.ui', function() {
   PluginListItem.prototype = {
     __proto__: ListItem.prototype,
 
-    contentElement_: null,
-    detailsElement_: null,
-
     decorate: function() {
       ListItem.prototype.decorate.call(this);
 
@@ -55,111 +52,19 @@ cr.define('pluginSettings.ui', function() {
 
       var nameEl = this.ownerDocument.createElement('div');
       nameEl.className = 'plugin-name';
-      nameEl.textContent = info.name;
-      nameEl.title = info.name;
-
-      var descriptionEl = this.ownerDocument.createElement('div');
-      descriptionEl.className = 'plugin-description';
-      descriptionEl.innerHTML = info.description;
-      descriptionEl.title = info.description;
+      nameEl.textContent = info.description;
+      nameEl.title = info.description;
 
       this.detailsElement_ = this.ownerDocument.createElement('div');
       this.detailsElement_.className = 'plugin-details hidden';
 
-      for (var i = 0; i < info.plugin_files.length; i++) {
-        this.addPluginFileDetails_(info.plugin_files[i]);
-      }
+      var rulesEl = this.ownerDocument.createElement('list');
+      pluginSettings.ui.RuleList.decorate(rulesEl);
+      rulesEl.setPluginSettings(info.id, pluginSettings.Settings.getInstance());
+      this.detailsElement_.appendChild(rulesEl);
 
       this.contentElement_.appendChild(nameEl);
-      this.contentElement_.appendChild(descriptionEl);
       this.contentElement_.appendChild(this.detailsElement_);
-    },
-
-    addPluginFileDetails_: function(details) {
-      var doc = this.ownerDocument;
-      var selectEl = doc.createElement('select');
-      this.addSelectOption_(selectEl, templateData.allowException, 'allow');
-      this.addSelectOption_(selectEl, templateData.askException, 'ask');
-      this.addSelectOption_(selectEl, templateData.blockException, 'block');
-
-      var table = doc.createElement('table');
-      table.className = 'plugin-details-table';
-      var tbody = doc.createElement('tbody');
-      this.addTableRow_(tbody, templateData.pluginName, details.name);
-      if (this.shouldDisplayVersion_(details.version))
-        this.addTableRow_(tbody, templateData.pluginVersion, details.version);
-      if (this.shouldDisplayDescription_(details.description))
-        this.addTableRow_(tbody, templateData.pluginDescription, details.description);
-
-      var mimeTypes = this.addTableRow_(tbody, templateData.pluginMimeTypes, '');
-      mimeTypes.className = 'plugin-mime-types';
-      var mimeTable = doc.createElement('table');
-      var mimeTBody = doc.createElement('tbody');
-      var mimeHeader = this.addMimeTypeTableRow_(mimeTBody,
-          templateData.pluginMimeTypesMimeType,
-          templateData.pluginMimeTypesDescription,
-          templateData.pluginMimeTypesFileExtensions);
-      mimeHeader.className = 'header';
-      for (var i = 0; i < details.mimeTypes.length; i++) {
-        this.addMimeTypeTableRow_(mimeTBody,
-            details.mimeTypes[i].mimeType,
-            details.mimeTypes[i].description,
-            details.mimeTypes[i].fileExtensions);
-      }
-
-      mimeTable.appendChild(mimeTBody);
-      mimeTypes.appendChild(mimeTable);
-      table.appendChild(tbody);
-      this.detailsElement_.appendChild(selectEl);
-      this.detailsElement_.appendChild(table);
-    },
-
-    addSelectOption_: function(select, name, value) {
-      var option = this.ownerDocument.createElement('option');
-      option.value = value;
-      option.textContent = name;
-      select.appendChild(option);
-    },
-
-    addTableRow_: function(tbody, labelText, valueText) {
-      var doc = this.ownerDocument;
-      var tr = doc.createElement('tr');
-      var labelEl = doc.createElement('td');
-      labelEl.className = 'plugin-details-table-label';
-      labelEl.textContent = labelText;
-      var valueEl = doc.createElement('td');
-      valueEl.className = 'plugin-details-table-value';
-      valueEl.textContent = valueText;
-
-      tr.appendChild(labelEl);
-      tr.appendChild(valueEl);
-      tbody.appendChild(tr);
-      return valueEl;
-    },
-
-    addMimeTypeTableRow_: function(tbody, mimeType, description, fileExtensions) {
-      var doc = this.ownerDocument;
-      var tr = doc.createElement('tr');
-      var mimeTypeEl = doc.createElement('td');
-      mimeTypeEl.textContent = mimeType;
-      var descriptionEl = doc.createElement('td');
-      descriptionEl.textContent = description;
-      var fileExtensionsEl = doc.createElement('td');
-      fileExtensionsEl.textContent = '.';
-
-      tr.appendChild(mimeTypeEl);
-      tr.appendChild(descriptionEl);
-      tr.appendChild(fileExtensionsEl);
-      tbody.appendChild(tr);
-      return tr;
-    },
-
-    shouldDisplayVersion_: function(version) {
-      return !!version && version !== '0';
-    },
-
-    shouldDisplayDescription_: function(description) {
-      return !!description;
     },
 
     expanded_: false,
@@ -194,7 +99,7 @@ cr.define('pluginSettings.ui', function() {
     },
 
     /**
-     * Disable animation within this cookie list item, in preparation for making
+     * Disable animation within this plugin list item, in preparation for making
      * changes that will need to be animated. Makes it possible to measure the
      * contents without displaying them, to set animation targets.
      * @private
@@ -242,7 +147,6 @@ cr.define('pluginSettings.ui', function() {
       this.selectionModel = sm;
       this.infoNodes = {};
       this.autoExpands = true;
-      var doc = this.ownerDocument;
     },
 
     createItem: function(info) {
