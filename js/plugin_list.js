@@ -7,12 +7,6 @@ cr.define('pluginSettings.ui', function() {
   const ListItem = cr.ui.ListItem;
   const ListSingleSelectionModel = cr.ui.ListSingleSelectionModel;
 
-  // XXX
-  var templateData = {
-    patternColumnHeader: 'Hostname Pattern',
-    settingColumnHeader: 'Behavior'
-  };
-
   /**
    * Returns the item's height, like offsetHeight but such that it works better
    * when the page is zoomed. See the similar calculation in @{code cr.ui.List}.
@@ -67,10 +61,12 @@ cr.define('pluginSettings.ui', function() {
       var columnHeadersEl = this.ownerDocument.createElement('div');
       columnHeadersEl.className = 'column-headers';
       var patternColumnEl = this.ownerDocument.createElement('div');
-      patternColumnEl.textContent = templateData.patternColumnHeader;
+      patternColumnEl.textContent =
+          chrome.i18n.getMessage("patternColumnHeader");
       patternColumnEl.className = 'pattern-column-header';
       var settingColumnEl = this.ownerDocument.createElement('div');
-      settingColumnEl.textContent = templateData.settingColumnHeader;
+      settingColumnEl.textContent =
+          chrome.i18n.getMessage("settingColumnHeader");
       settingColumnEl.className = 'setting-column-header';
       columnHeadersEl.appendChild(patternColumnEl);
       columnHeadersEl.appendChild(settingColumnEl);

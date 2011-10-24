@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-var templateData = {
-  'allowRule': 'Allow',
-  'blockRule': 'Block'
-}
-
 cr.define('pluginSettings.ui', function() {
   const InlineEditableItemList = options.InlineEditableItemList;
   const InlineEditableItem = options.InlineEditableItem;
@@ -57,12 +52,12 @@ cr.define('pluginSettings.ui', function() {
       // Setting select element for edit mode.
       var select = cr.doc.createElement('select');
       var optionAllow = cr.doc.createElement('option');
-      optionAllow.textContent = templateData.allowRule;
+      optionAllow.textContent = chrome.i18n.getMessage("allowRule");
       optionAllow.value = 'allow';
       select.appendChild(optionAllow);
 
       var optionBlock = cr.doc.createElement('option');
-      optionBlock.textContent = templateData.blockRule;
+      optionBlock.textContent = chrome.i18n.getMessage("blockRule");
       optionBlock.value = 'block';
       select.appendChild(optionBlock);
 
@@ -110,9 +105,9 @@ cr.define('pluginSettings.ui', function() {
     settingForDisplay: function() {
       var setting = this.setting;
       if (setting == 'allow')
-        return templateData.allowRule;
+        return chrome.i18n.getMessage("allowRule");
       else if (setting == 'block')
-        return templateData.blockRule;
+        return chrome.i18n.getMessage("blockRule");
     },
 
     /**

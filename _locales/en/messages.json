@@ -1,0 +1,14 @@
+{
+  "patternColumnHeader": {
+    "message": "Hostname Pattern"
+  },
+  "settingColumnHeader": {
+    "message": "Behavior"
+  },
+  "allowRule": {
+    "message": "Allow"
+  },
+  "blockRule": {
+    "message": "Block"
+  }
+}
