@@ -31,9 +31,11 @@ cr.define('pluginSettings', function() {
           callback();
           return;
         }
-        $('error').textContent = '';
-        var length = window.localStorage.length;
-        var count = length;
+        var count = window.localStorage.length;
+        if (count == 0) {
+          callback();
+          return;
+        }
         var errors = [];
         for (var i = 0; i < length; i++) {
           var key = window.localStorage.key(i);

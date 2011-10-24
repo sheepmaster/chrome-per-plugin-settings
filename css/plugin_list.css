@@ -65,11 +65,3 @@ li.plugin-show-details {
 .column-headers > div {
   font-weight: bold;
 }
-
-.pattern-column-header {
-  -webkit-box-flex: 1;
-}
-
-.setting-column-header {
-  width: 145px;
-}
