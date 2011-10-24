@@ -1,9 +1,14 @@
 {
-  "name" : "Content settings",
-  "version" : "0.1",
-  "description" : "Shows the content settings for the current site.",
+  "name" : "Per-plugin content settings",
+  "version" : "0.3",
+  "description" : "Allows you customize your content setting for different plug-ins.",
   "options_page": "options.html",
   "permissions": [
     "contentSettings"
-  ]
+  ],
+  "icons": {
+    "128": "bunny128.png",
+    "48": "bunny48.png"
+  },
+  "minimum_chrome_version": "16.0.912"
 }

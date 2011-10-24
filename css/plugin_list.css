@@ -4,6 +4,13 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 */
 
+body {
+  font-family: Helvetica, sans-serif;
+  background-color: white;
+  color: black;
+  margin: 10px;
+}
+
 .plugin-name {
   display: inline-block;
   overflow: hidden;
@@ -49,34 +56,14 @@ li.plugin-show-details {
   height: auto;
 }
 
-.plugin-details-table {
-  table-layout: fixed;
-  width: 100%;
-}
-
-.plugin-details-table-label {
-  width: 10em;
-  white-space: pre;
-  vertical-align: top;
-}
-
-.plugin-details-table-value {
-  word-wrap: break-word;
-  white-space: normal;
-}
-
-.plugin-mime-types {
-  font-size: 95%;
-}
-
-.plugin-mime-types tr.header > td {
-  border-bottom: 1px solid;
-}
-
 .column-headers {
   -webkit-margin-start: 17px;
   display: -webkit-box;
   margin-top: 17px;
+}
+
+.column-headers > div {
+  font-weight: bold;
 }
 
 .pattern-column-header {

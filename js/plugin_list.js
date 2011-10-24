@@ -103,6 +103,7 @@ cr.define('pluginSettings.ui', function() {
         this.classList.add('plugin-show-details');
       } else {
         if (this.list.expandItem == this) {
+          this.list.leadItemHeight = 0;
           this.list.expandItem = null;
         }
         this.style.height = '';
@@ -112,8 +113,8 @@ cr.define('pluginSettings.ui', function() {
     },
 
     updateItems_: function() {
-      /*this.disableAnimation_();*/
-      /*this.enableAnimation_();*/
+      // this.disableAnimation_();
+      // this.enableAnimation_();
     },
 
     /**

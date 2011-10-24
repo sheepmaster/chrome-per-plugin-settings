@@ -7,104 +7,6 @@ var templateData = {
   'blockRule': 'Block'
 }
 
-cr.define('pluginSettings', function() {
-  const EventTarget = cr.EventTarget;
-  const Event = cr.Event;
-
-  function Settings(plugin) {
-    this.plugin_ = plugin;
-  }
-
-  Settings.prototype = {
-    __proto__: cr.EventTarget.prototype,
-
-    dispatchChangeEvent_: function() {
-      var e = new Event('change');
-      this.dispatchEvent(e);
-    },
-
-    /**
-     * Clears all content settings, and recreates them from local storage.
-     */
-    recreateRules_: function(callback) {
-      chrome.contentSettings.plugins.clear({}, function() {
-        var length = window.localStorage.length;
-        var count = length;
-        for (var i = 0; i < length; i++) {
-          var key = window.localStorage.key(i);
-          var keyArray = JSON.parse(key);
-          chrome.contentSettings.plugins.set({
-              'primaryPattern': keyArray[1],
-              'resourceIdentifier': { 'id': keyArray[0] },
-              'setting': window.localStorage.getItem(key),
-          }, function() {
-            count--;
-            if (count == 0)
-              callback();
-          });
-        }
-      });
-    },
-
-    set: function(primaryPattern, setting) {
-      var settings = this;
-      var plugin = this.plugin_;
-      chrome.contentSettings.plugins.set({
-          'primaryPattern': primaryPattern,
-          'resourceIdentifier': { 'id': plugin },
-          'setting': setting,
-      }, function() {
-        if (!chrome.extension.lastError) {
-          window.localStorage.setItem(JSON.stringify([plugin, primaryPattern]),
-                                      setting);
-          cr.dispatchSimpleEvent(settings, 'change');
-        }
-      });
-    },
-
-    clear: function(primaryPattern) {
-      window.localStorage.removeItem(
-          JSON.stringify([this.plugin_, primaryPattern]));
-      var settings = this;
-      this.recreateRules_(function() {
-        settings.dispatchChangeEvent_();
-      });
-      // chrome.contentSettings.plugins.set({
-      //   'primaryPattern': primaryPattern,
-      //   'secondaryPattern': secondaryPattern,
-      //   'resourceIdentifier': { 'id': id },
-      //   'setting': null,
-      // }, checkError);
-    },
-
-    get: function(primaryPattern) {
-      return window.localStorage.getItem(
-            JSON.stringify([this.plugin_, primaryPattern]));
-    },
-
-    getAll: function() {
-      var length = window.localStorage.length;
-      var rules = [];
-      for (var i = 0; i < length; i++) {
-        var key = window.localStorage.key(i);
-        var keyArray = JSON.parse(key);
-        if (keyArray[0] == this.plugin_) {
-          rules.push({
-            'primaryPattern': keyArray[1],
-            'setting': window.localStorage.getItem(key),
-          });
-        }
-      }
-      return rules;
-    }
-  };
-
-  return {
-    Settings: Settings,
-  }
-});
-
-
 cr.define('pluginSettings.ui', function() {
   const InlineEditableItemList = options.InlineEditableItemList;
   const InlineEditableItem = options.InlineEditableItem;
@@ -132,7 +34,7 @@ cr.define('pluginSettings.ui', function() {
 
       this.isPlaceholder = !this.pattern;
       var patternCell = this.createEditableTextCell(this.pattern);
-      patternCell.className = 'exception-pattern';
+      patternCell.className = 'rule-pattern';
       patternCell.classList.add('weakrtl');
       this.contentElement.appendChild(patternCell);
       if (this.pattern)
@@ -146,7 +48,7 @@ cr.define('pluginSettings.ui', function() {
       if (this.pattern) {
         var settingLabel = cr.doc.createElement('span');
         settingLabel.textContent = this.settingForDisplay();
-        settingLabel.className = 'exception-setting';
+        settingLabel.className = 'rule-behavior';
         settingLabel.setAttribute('displaymode', 'static');
         this.contentElement.appendChild(settingLabel);
         this.settingLabel = settingLabel;
@@ -165,7 +67,7 @@ cr.define('pluginSettings.ui', function() {
       select.appendChild(optionBlock);
 
       this.contentElement.appendChild(select);
-      select.className = 'exception-setting';
+      select.className = 'rule-behavior';
       if (this.pattern)
         select.setAttribute('displaymode', 'edit');
 
@@ -273,11 +175,7 @@ cr.define('pluginSettings.ui', function() {
       this.pattern = newPattern;
       this.setting = newSetting;
 
-      if (oldPattern != newPattern) {
-        this.list_.settings.clear(oldPattern);
-      }
-
-      this.list_.settings.set(newPattern, newSetting);
+      this.list_.settings.update(oldPattern, newPattern, newSetting);
     }
   };
   
@@ -411,17 +309,3 @@ cr.define('pluginSettings.ui', function() {
   }
 });
 
-function processPlugins(r) {
-  if (r) {
-    // console.log(JSON.stringify(r));
-    var pluginList = document.getElementById('plugin-list');
-    pluginSettings.ui.PluginList.decorate(pluginList);
-    pluginList.dataModel = new cr.ui.ArrayDataModel(r);
-  } else {
-    console.log("Please update to a more recent version of Chrome.");
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  chrome.contentSettings.plugins.getResourceIdentifiers(processPlugins);
-});
