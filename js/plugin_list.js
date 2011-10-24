@@ -72,13 +72,20 @@ cr.define('pluginSettings.ui', function() {
       columnHeadersEl.appendChild(settingColumnEl);
       this.detailsElement_.appendChild(columnHeadersEl);
 
-      var rulesEl = this.ownerDocument.createElement('list');
-      pluginSettings.ui.RuleList.decorate(rulesEl);
-      rulesEl.setPluginSettings(new pluginSettings.Settings(info.id));
-      this.detailsElement_.appendChild(rulesEl);
-
       this.contentElement_.appendChild(nameEl);
       this.contentElement_.appendChild(this.detailsElement_);
+
+      // Create the rule list asynchronously, to make sure that it is already
+      // fully integrated in the DOM tree.
+      window.setTimeout(this.loadRules_.bind(this), 0);
+    },
+
+    loadRules_: function() {
+      var rulesEl = this.ownerDocument.createElement('list');
+      this.detailsElement_.appendChild(rulesEl);
+
+      pluginSettings.ui.RuleList.decorate(rulesEl);
+      rulesEl.setPluginSettings(new pluginSettings.Settings(this.info_.id));
     },
 
     expanded_: false,
