@@ -10,5 +10,6 @@
     "128": "bunny128.png",
     "48": "bunny48.png"
   },
-  "minimum_chrome_version": "16.0.912"
+  "minimum_chrome_version": "16.0.912",
+  "content_security_policy": "default-src 'self' "
 }
