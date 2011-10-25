@@ -100,7 +100,6 @@ cr.define('pluginSettings.ui', function() {
         var oldExpanded = this.list.expandItem;
         this.list.expandItem = this;
         this.detailsElement_.classList.remove('hidden');
-        this.updateItems_();
         if (oldExpanded)
           oldExpanded.expanded = false;
         this.classList.add('plugin-show-details');
@@ -113,46 +112,6 @@ cr.define('pluginSettings.ui', function() {
         this.detailsElement_.classList.add('hidden');
         this.classList.remove('plugin-show-details');
       }
-    },
-
-    updateItems_: function() {
-      // this.disableAnimation_();
-      // this.enableAnimation_();
-    },
-
-    /**
-     * Disable animation within this plugin list item, in preparation for making
-     * changes that will need to be animated. Makes it possible to measure the
-     * contents without displaying them, to set animation targets.
-     * @private
-     */
-    disableAnimation_: function() {
-      this.itemsHeight_ = getItemHeight(this.detailsElement_);
-      this.classList.add('plugin-measure-details');
-    },
-
-    /**
-     * Enable animation after changing the contents of this cookie list item.
-     * See @{code disableAnimation_}.
-     * @private
-     */
-    enableAnimation_: function() {
-      if (!this.classList.contains('plugin-measure-details'))
-        this.disableAnimation_();
-      this.detailsElement_.style.height = '';
-      // This will force relayout in order to calculate the new heights.
-      var itemsHeight = getItemHeight(this.detailsElement_);
-      var fixedHeight = getItemHeight(this) + itemsHeight - this.itemsHeight_;
-      this.detailsElement_.style.height = this.itemsHeight_ + 'px';
-      // Force relayout before enabling animation, so that if we have
-      // changed things since the last layout, they will not be animated
-      // during subsequent layouts.
-      this.detailsElement_.offsetHeight;
-      this.classList.remove('plugin-measure-details');
-      this.detailsElement_.style.height = itemsHeight + 'px';
-      this.style.height = fixedHeight + 'px';
-      if (this.expanded)
-        this.list.leadItemHeight = fixedHeight;
     },
   };
 
