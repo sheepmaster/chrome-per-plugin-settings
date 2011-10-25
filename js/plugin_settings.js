@@ -25,7 +25,7 @@ cr.define('pluginSettings', function() {
      * @type {string}
      * @private
      */
-    plugin_: NULL,
+    plugin_: null,
 
     /**
      * Called when a transaction is finished.
