@@ -24,24 +24,41 @@ cr.define('pluginSettings.ui', function() {
   }
 
   /**
-   *
+   * Creates a new plug-in list item element.
+   * @param {PluginList} list The plug-in list containing this item.
+   * @param {Object} info Information about the plug-in.
+   * @constructor
+   * @extends {cr.ui.ListItem}
    */
-  function PluginListItem(info, list) {
+  function PluginListItem(list, info) {
     var el = cr.doc.createElement('li');
-    el.list = list;
+    el.list_ = list;
     el.info_ = info;
-    PluginListItem.decorate(el);
-    return el;
-  }
-
-  PluginListItem.decorate = function(el) {
     el.__proto__ = PluginListItem.prototype;
     el.decorate();
-  };
+    return el;
+  }
 
   PluginListItem.prototype = {
     __proto__: ListItem.prototype,
 
+    /**
+     * The plug-in list containing this item.
+     * @type {PluginList}
+     * @private
+     */
+    list_: null,
+
+    /**
+     * Information about the plug-in.
+     * @type {Object}
+     * @private
+     */
+    info_: null,
+
+    /**
+     * Initializes the element.
+     */
     decorate: function() {
       ListItem.prototype.decorate.call(this);
 
@@ -80,6 +97,10 @@ cr.define('pluginSettings.ui', function() {
       window.setTimeout(this.loadRules_.bind(this), 0);
     },
 
+    /**
+     * Create the list of content setting rules applying to this plug-in.
+     * @private
+     */
     loadRules_: function() {
       var rulesEl = this.ownerDocument.createElement('list');
       this.detailsElement_.appendChild(rulesEl);
@@ -88,6 +109,10 @@ cr.define('pluginSettings.ui', function() {
       rulesEl.setPluginSettings(new pluginSettings.Settings(this.info_.id));
     },
 
+    /**
+     * Whether this item is expanded or not.
+     * @type {boolean}
+     */
     expanded_: false,
     get expanded() {
       return this.expanded_;
@@ -97,16 +122,16 @@ cr.define('pluginSettings.ui', function() {
         return;
       this.expanded_ = expanded;
       if (expanded) {
-        var oldExpanded = this.list.expandItem;
-        this.list.expandItem = this;
+        var oldExpanded = this.list_.expandItem;
+        this.list_.expandItem = this;
         this.detailsElement_.classList.remove('hidden');
         if (oldExpanded)
           oldExpanded.expanded = false;
         this.classList.add('plugin-show-details');
       } else {
-        if (this.list.expandItem == this) {
-          this.list.leadItemHeight = 0;
-          this.list.expandItem = null;
+        if (this.list_.expandItem == this) {
+          this.list_.leadItemHeight = 0;
+          this.list_.expandItem = null;
         }
         this.style.height = '';
         this.detailsElement_.classList.add('hidden');
@@ -115,11 +140,19 @@ cr.define('pluginSettings.ui', function() {
     },
   };
 
+  /**
+   * Creates a new plug-in list.
+   * @constructor
+   * @extends {cr.ui.List}
+   */
   var PluginList = cr.ui.define('list');
 
   PluginList.prototype = {
     __proto__: List.prototype,
 
+    /**
+     * Initializes the element.
+     */
     decorate: function() {
       List.prototype.decorate.call(this);
       this.classList.add('settings-list');
@@ -130,10 +163,17 @@ cr.define('pluginSettings.ui', function() {
       this.autoExpands = true;
     },
 
+    /**
+     * Creates a new plug-in list item.
+     * @param {Object} info Information about the plug-in.
+     */
     createItem: function(info) {
-      return new PluginListItem(info, this);
+      return new PluginListItem(this, info);
     },
 
+    /**
+     * Called when the selection changes.
+     */
     handleSelectionChange_: function(ce) {
       ce.changes.forEach(function(change) {
         var listItem = this.getListItemByIndex(change.index);

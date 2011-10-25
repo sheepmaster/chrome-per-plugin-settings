@@ -7,11 +7,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (chrome.extension.lastError) {
       $('error').textContent =
           "Error: " + chrome.extension.lastError.message;
-    } else {
-      $('error').textContent = '';
-      var pluginList = $('plugin-list');
-      pluginSettings.ui.PluginList.decorate(pluginList);
-      pluginList.dataModel = new cr.ui.ArrayDataModel(r);
+      return;
     }
+    var pluginList = $('plugin-list');
+    pluginSettings.ui.PluginList.decorate(pluginList);
+    pluginList.dataModel = new cr.ui.ArrayDataModel(r);
   });
 });

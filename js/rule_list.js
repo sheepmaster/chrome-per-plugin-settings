@@ -7,10 +7,17 @@ cr.define('pluginSettings.ui', function() {
   const InlineEditableItem = options.InlineEditableItem;
   const ArrayDataModel = cr.ui.ArrayDataModel;
 
+  /**
+   * Creates a new rule list item.
+   * @param {RuleList} list The rule list containing this item.
+   * @param {Object} rule The content setting rule.
+   * @constructor
+   * @extends {options.InlineEditableItem}
+   */
   function RuleListItem(list, rule) {
-    var el = cr.doc.createElement('div');
+    var el = cr.doc.createElement('li');
 
-    el.dataItem = rule;
+    el.dataItem_ = rule;
     el.list_ = list;
     el.__proto__ = RuleListItem.prototype;
     el.decorate();
@@ -19,8 +26,22 @@ cr.define('pluginSettings.ui', function() {
   }
   
   RuleListItem.prototype = {
-    __proto__: InlineEditableItem.prototype,  // ???
-    
+    __proto__: InlineEditableItem.prototype,
+
+    /**
+     * The content setting rule.
+     * @type {Object}
+     * @private
+     */
+    dataItem_: null,
+
+    /**
+     * The rule list containing this item.
+     * @type {RuleList}
+     * @private
+     */
+    list_: null,
+
     /**
      * Called when an element is decorated as a list item.
      */
@@ -77,25 +98,25 @@ cr.define('pluginSettings.ui', function() {
     },
     
     /**
-     * The pattern (e.g., a URL) for the exception.
+     * The pattern (e.g., a URL) for the rule.
      * @type {string}
      */
     get pattern() {
-      return this.dataItem['primaryPattern'];
+      return this.dataItem_['primaryPattern'];
     },
     set pattern(pattern) {
-      this.dataItem['primaryPattern'] = pattern;
+      this.dataItem_['primaryPattern'] = pattern;
     },
 
     /**
-     * The setting (allow/block) for the exception.
+     * The setting (allow/block) for the rule.
      * @type {string}
      */
     get setting() {
-      return this.dataItem['setting'];
+      return this.dataItem_['setting'];
     },
     set setting(setting) {
-      this.dataItem['setting'] = setting;
+      this.dataItem_['setting'] = setting;
     },
 
     /**
@@ -174,10 +195,16 @@ cr.define('pluginSettings.ui', function() {
     }
   };
   
+  /**
+   * Create a new list item to add a rule.
+   * @param {RuleList} list The rule list containing this item.
+   * @constructor
+   * @extends {AddRuleListItem}
+   */
   function AddRuleListItem(list) {
     var el = cr.doc.createElement('div');
-    el.dataItem = {};
-    el.list = list;
+    el.dataItem_ = {};
+    el.list_ = list;
     el.__proto__ = AddRuleListItem.prototype;
     el.decorate();
 
@@ -187,6 +214,9 @@ cr.define('pluginSettings.ui', function() {
   AddRuleListItem.prototype = {
     __proto__: RuleListItem.prototype,
 
+    /**
+     * Initializes the element.
+     */
     decorate: function() {
       RuleListItem.prototype.decorate.call(this);
       
@@ -213,12 +243,12 @@ cr.define('pluginSettings.ui', function() {
      */
     finishEdit: function(newPattern, newSetting) {
       this.resetInput();
-      this.list.settings.set(newPattern, newSetting);
+      this.list_.settings.set(newPattern, newSetting);
     },
   };
   
   /**
-   * Creates a new exceptions list.
+   * Creates a new rule list.
    * @constructor
    * @extends {cr.ui.List}
    */
@@ -226,6 +256,12 @@ cr.define('pluginSettings.ui', function() {
 
   RuleList.prototype = {
     __proto__: InlineEditableItemList.prototype,
+
+    /**
+     * The content settings model for this list. 
+     * @type {Settings}
+     */
+    settings: null,
 
     /**
      * Called when an element is decorated as a list.
@@ -266,10 +302,17 @@ cr.define('pluginSettings.ui', function() {
       this.dataModel.splice.apply(this.dataModel, args);  // ???
     },
 
+    /**
+     * Called when the list of content setting rules changes.
+     */
     handleSettingsChange_: function(e) {
       this.setRules_(this.settings.getAll());
     },
 
+    /**
+     * Binds this list to the content settings model.
+     * @param {Settings} settings The content settings model.
+     */
     setPluginSettings: function(settings) {
       this.settings = settings;
       this.setRules_(settings.getAll());
@@ -291,9 +334,7 @@ cr.define('pluginSettings.ui', function() {
       if (listItem.undeletable)
         return;
 
-      var dataItem = listItem.dataItem;
-
-      this.settings.clear(dataItem['primaryPattern']);
+      this.settings.clear(listItem.setting);
     },
   };
   

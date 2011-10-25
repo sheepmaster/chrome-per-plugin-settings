@@ -6,6 +6,13 @@ cr.define('pluginSettings', function() {
   const EventTarget = cr.EventTarget;
   const Event = cr.Event;
 
+  /**
+   * Creates a new content settings model.
+   * @param {string} plugin Identifies the plug-in for which this object stores
+   *     settings.
+   * @constructor
+   * @extends {cr.EventTarget}
+   */
   function Settings(plugin) {
     this.plugin_ = plugin;
   }
@@ -13,6 +20,19 @@ cr.define('pluginSettings', function() {
   Settings.prototype = {
     __proto__: cr.EventTarget.prototype,
 
+    /**
+     * Identifies the plug-in for which this object stores settings.
+     * @type {string}
+     * @private
+     */
+    plugin_: NULL,
+
+    /**
+     * Called when a transaction is finished.
+     * @param {?string} error The error message, if an error occurred.
+     *     Otherwise, this is null.
+     * @private
+     */
     transactionFinished_: function(error) {
       if (error)
         $('error').textContent = 'Error: ' + error;
@@ -23,6 +43,9 @@ cr.define('pluginSettings', function() {
 
     /**
      * Clears all content settings, and recreates them from local storage.
+     * @param {function()} callback Called when the content settings have been
+     *     recreated.
+     * @private
      */
     recreateRules_: function(callback) {
       chrome.contentSettings.plugins.clear({}, function() {
@@ -62,45 +85,72 @@ cr.define('pluginSettings', function() {
       });
     },
 
-    setInternal_: function(primaryPattern, setting, callback) {
+    /**
+     * Creates a content setting rule and calls the passed in callback with the
+     *     result.
+     * @param {string} pattern The content setting pattern for the rule.
+     * @param {string} setting The setting for the rule.
+     * @param {function(?string)} callback Called when the content settings have
+     *     been updated.
+     * @private
+     */
+    setInternal_: function(pattern, setting, callback) {
       var plugin = this.plugin_;
       chrome.contentSettings.plugins.set({
-          'primaryPattern': primaryPattern,
+          'primaryPattern': pattern,
           'resourceIdentifier': { 'id': plugin },
           'setting': setting,
       }, function() {
         if (chrome.extension.lastError) {
           callback(chrome.extension.lastError.message);
         } else {
-          window.localStorage.setItem(JSON.stringify([plugin, primaryPattern]),
+          window.localStorage.setItem(JSON.stringify([plugin, pattern]),
                                       setting);
-          callback();
+          callback(null);
         }
       });
     },
 
+    /**
+     * Creates a content setting rule.
+     * @param {string} pattern The content setting pattern for the rule.
+     * @param {string} setting The setting for the rule.
+     */
     set: function(pattern, setting) {
       var settings = this;
       this.setInternal_(pattern, setting, this.transactionFinished_.bind(this));
     },
 
-    clearInternal_: function(primaryPattern, callback) {
+    /**
+     * Removes the content setting rule with a given pattern, and calls the
+     *     passed in callback afterwards.
+     * @param {string} pattern The content setting pattern for the rule.
+     * @param {function(?string)} callback Called when the content settings have
+     *     been updated.
+     * @private
+     */
+    clearInternal_: function(pattern, callback) {
       window.localStorage.removeItem(
-          JSON.stringify([this.plugin_, primaryPattern]));
+          JSON.stringify([this.plugin_, pattern]));
       this.recreateRules_(callback);
-      // chrome.contentSettings.plugins.set({
-      //   'primaryPattern': primaryPattern,
-      //   'secondaryPattern': secondaryPattern,
-      //   'resourceIdentifier': { 'id': id },
-      //   'setting': null,
-      // }, checkError);
     },
 
+    /**
+     * Removes the content setting rule with a given pattern.
+     * @param {string} pattern The content setting pattern for the rule.
+     */
     clear: function(pattern) {
       var settings = this;
       this.clearInternal_(pattern, this.transactionFinished_.bind(this));
     },
 
+    /**
+     * Updates the content setting rule with a given pattern to a new pattern
+     *     and setting.
+     * @param {string} oldPattern The old content setting pattern for the rule.
+     * @param {string} newPattern The new content setting pattern for the rule.
+     * @param {string} setting The setting for the rule.
+     */
     update: function(oldPattern, newPattern, setting) {
       if (oldPattern == newPattern) {
         // Avoid recreating all rules if only the setting changed.
@@ -130,11 +180,19 @@ cr.define('pluginSettings', function() {
       });
     },
 
+    /**
+     * Returns the content setting for a given pattern.
+     * @param {string} pattern The content setting pattern for the rule.
+     * @return {string} The setting for the rule.
+     */
     get: function(primaryPattern) {
       return window.localStorage.getItem(
           JSON.stringify([this.plugin_, primaryPattern]));
     },
 
+    /**
+     * @return {array} A list of all content setting rules for this plug-in.
+     */
     getAll: function() {
       var length = window.localStorage.length;
       var rules = [];
