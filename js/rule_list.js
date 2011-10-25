@@ -24,7 +24,7 @@ cr.define('pluginSettings.ui', function() {
 
     return el;
   }
-  
+
   RuleListItem.prototype = {
     __proto__: InlineEditableItem.prototype,
 
@@ -96,7 +96,7 @@ cr.define('pluginSettings.ui', function() {
       this.addEventListener('canceledit', this.onEditCancelled_);
       this.addEventListener('commitedit', this.onEditCommitted_);
     },
-    
+
     /**
      * The pattern (e.g., a URL) for the rule.
      * @type {string}
@@ -194,7 +194,7 @@ cr.define('pluginSettings.ui', function() {
       this.list_.settings.update(oldPattern, newPattern, newSetting);
     }
   };
-  
+
   /**
    * Create a new list item to add a rule.
    * @param {RuleList} list The rule list containing this item.
@@ -219,10 +219,10 @@ cr.define('pluginSettings.ui', function() {
      */
     decorate: function() {
       RuleListItem.prototype.decorate.call(this);
-      
+
       this.setting = 'allow';
     },
-  
+
     /**
      * Clear the <input> and let the placeholder text show again.
      */
@@ -246,7 +246,7 @@ cr.define('pluginSettings.ui', function() {
       this.list_.settings.set(newPattern, newSetting);
     },
   };
-  
+
   /**
    * Creates a new rule list.
    * @constructor
@@ -258,7 +258,7 @@ cr.define('pluginSettings.ui', function() {
     __proto__: InlineEditableItemList.prototype,
 
     /**
-     * The content settings model for this list. 
+     * The content settings model for this list.
      * @type {Settings}
      */
     settings: null,
@@ -337,7 +337,7 @@ cr.define('pluginSettings.ui', function() {
       this.settings.clear(listItem.setting);
     },
   };
-  
+
   return {
     RuleListItem: RuleListItem,
     AddRuleListItem: AddRuleListItem,
