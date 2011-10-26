@@ -299,7 +299,7 @@ cr.define('pluginSettings.ui', function() {
 
       var args = [0, deleteCount];
       args.push.apply(args, entries);
-      this.dataModel.splice.apply(this.dataModel, args);  // ???
+      this.dataModel.splice.apply(this.dataModel, args);
     },
 
     /**
@@ -334,7 +334,7 @@ cr.define('pluginSettings.ui', function() {
       if (listItem.undeletable)
         return;
 
-      this.settings.clear(listItem.setting);
+      this.settings.clear(listItem.pattern);
     },
   };
 

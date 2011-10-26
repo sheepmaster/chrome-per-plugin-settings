@@ -42,9 +42,12 @@ cr.define('pluginSettings', function() {
     },
 
     /**
-     * Clears all content settings, and recreates them from local storage.
+     * Clears all content settings, and recreates them from local storage. If a
+     * content setting can't be set (which shouldn't really happen, as it has
+     * been successfully set previously), it is removed from local storage as
+     * well.
      * @param {function()} callback Called when the content settings have been
-     *     recreated.
+     *     recreated, or on error.
      * @private
      */
     recreateRules_: function(callback) {
@@ -54,11 +57,12 @@ cr.define('pluginSettings', function() {
           callback();
           return;
         }
-        var count = window.localStorage.length;
-        if (count == 0) {
+        var length = window.localStorage.length;
+        if (length == 0) {
           callback();
           return;
         }
+        var count = length;
         var errors = [];
         for (var i = 0; i < length; i++) {
           var key = window.localStorage.key(i);
