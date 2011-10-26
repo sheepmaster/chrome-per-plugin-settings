@@ -269,7 +269,7 @@ cr.define('pluginSettings.ui', function() {
     decorate: function() {
       InlineEditableItemList.prototype.decorate.call(this);
 
-      this.classList.add('settings-list');
+      this.classList.add('rule-list');
 
       this.autoExpands = true;
       this.reset();

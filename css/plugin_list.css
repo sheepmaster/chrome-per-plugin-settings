@@ -11,6 +11,15 @@ body {
   margin: 10px;
 }
 
+.plugin-list {
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+}
+
+.plugin-list > li {
+  padding: 3px;
+}
+
 .plugin-name {
   display: inline-block;
   overflow: hidden;
@@ -59,7 +68,6 @@ li.plugin-show-details {
 .column-headers {
   -webkit-margin-start: 17px;
   display: -webkit-box;
-  margin-top: 17px;
 }
 
 .column-headers > div {

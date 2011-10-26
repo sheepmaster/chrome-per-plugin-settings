@@ -155,7 +155,7 @@ cr.define('pluginSettings.ui', function() {
      */
     decorate: function() {
       List.prototype.decorate.call(this);
-      this.classList.add('settings-list');
+      this.classList.add('plugin-list');
       var sm = new ListSingleSelectionModel();
       sm.addEventListener('change', this.handleSelectionChange_.bind(this));
       this.selectionModel = sm;

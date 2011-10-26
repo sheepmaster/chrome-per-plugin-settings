@@ -48,27 +48,6 @@ list:not([hasElementFocus]) > [selected][lead]:hover {
   background-image: none;
 }
 
-list[hasElementFocus] > [lead],
-list[hasElementFocus] > [lead][selected] {
-  border-top: 1px solid #7892b4;
-  border-bottom: 1px solid #7892b4;
-}
-
-list[hasElementFocus] > [lead]:nth-child(2),
-list[hasElementFocus] > [lead][selected]:nth-child(2) {
-  border-top: 1px solid transparent;
-}
-
-list[hasElementFocus] > [lead]:nth-last-child(2),
-list[hasElementFocus] > [lead][selected]:nth-last-child(2) {
-  border-bottom: 1px solid transparent;
-}
-
-list[disabled] > [lead][selected],
-list[disabled]:focus > [lead][selected] {
-  border: none;
-}
-
 list[disabled] {
   opacity: 0.6;
 }
