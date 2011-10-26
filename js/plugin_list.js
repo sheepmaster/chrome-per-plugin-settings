@@ -57,6 +57,13 @@ cr.define('pluginSettings.ui', function() {
     info_: null,
 
     /**
+     * The element containing details about the plug-in.
+     * @type {HTMLDivElemebt}
+     * @private
+     */
+    detailsElement_: null,
+
+    /**
      * Initializes the element.
      */
     decorate: function() {

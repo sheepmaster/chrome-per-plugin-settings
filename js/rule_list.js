@@ -43,6 +43,34 @@ cr.define('pluginSettings.ui', function() {
     list_: null,
 
     /**
+     * The text input element for the pattern.
+     * @type {HTMLInputElement}
+     * @private
+     */
+    input_: null,
+
+    /**
+     * The popup button for the setting.
+     * @type {HTMLSelectElement}
+     * @private
+     */
+    select_: null,
+
+    /**
+     * The static text field containing the pattern.
+     * @type {HTMLDivElement}
+     * @private
+     */
+    patternLabel_: null,
+
+    /**
+     * The static text field containing the setting.
+     * @type {HTMLDivElement}
+     * @private
+     */
+    settingLabel_: null,
+
+    /**
      * Called when an element is decorated as a list item.
      */
     decorate: function() {
