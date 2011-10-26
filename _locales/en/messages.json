@@ -16,5 +16,8 @@
   },
   "blockRule": {
     "message": "Block"
+  },
+  "addNewPattern": {
+    "message": "Add a new hostname pattern"
   }
 }

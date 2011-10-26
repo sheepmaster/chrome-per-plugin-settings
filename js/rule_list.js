@@ -53,9 +53,11 @@ cr.define('pluginSettings.ui', function() {
       patternCell.className = 'rule-pattern';
       patternCell.classList.add('weakrtl');
       this.contentElement.appendChild(patternCell);
-      if (this.pattern)
-        this.patternLabel = patternCell.querySelector('.static-text');
       var input = patternCell.querySelector('input');
+      if (this.pattern)
+        this.patternLabel_ = patternCell.querySelector('.static-text');
+      else
+        input.placeholder = chrome.i18n.getMessage("addNewPattern");
 
       // TODO(stuartmorgan): Create an createEditableSelectCell abstracting
       // this code.
