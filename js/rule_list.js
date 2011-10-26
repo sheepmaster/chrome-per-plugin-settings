@@ -69,7 +69,7 @@ cr.define('pluginSettings.ui', function() {
         settingLabel.className = 'rule-behavior';
         settingLabel.setAttribute('displaymode', 'static');
         this.contentElement.appendChild(settingLabel);
-        this.settingLabel = settingLabel;
+        this.settingLabel_ = settingLabel;
       }
 
       // Setting select element for edit mode.
@@ -89,8 +89,8 @@ cr.define('pluginSettings.ui', function() {
       if (this.pattern)
         select.setAttribute('displaymode', 'edit');
 
-      this.input = input;
-      this.select = select;
+      this.input_ = input;
+      this.select_ = select;
 
       this.updateEditables();
 
@@ -138,7 +138,7 @@ cr.define('pluginSettings.ui', function() {
      * editing.
      */
     resetInput: function() {
-      this.input.value = this.pattern;
+      this.input_.value = this.pattern;
     },
 
     /**
@@ -148,15 +148,15 @@ cr.define('pluginSettings.ui', function() {
       this.resetInput();
 
       var settingOption =
-          this.select.querySelector('[value=\'' + this.setting + '\']');
+          this.select_.querySelector('[value=\'' + this.setting + '\']');
       if (settingOption)
         settingOption.selected = true;
     },
 
     /** @inheritDoc */
     get hasBeenEdited() {
-      var livePattern = this.input.value;
-      var liveSetting = this.select.value;
+      var livePattern = this.input_.value;
+      var liveSetting = this.select_.value;
       return livePattern != this.pattern || liveSetting != this.setting;
     },
 
@@ -166,8 +166,8 @@ cr.define('pluginSettings.ui', function() {
      * @private
      */
     onEditCommitted_: function(e) {
-      var newPattern = this.input.value;
-      var newSetting = this.select.value;
+      var newPattern = this.input_.value;
+      var newSetting = this.select_.value;
 
       this.finishEdit(newPattern, newSetting);
     },
@@ -187,8 +187,8 @@ cr.define('pluginSettings.ui', function() {
      * @param {string} newSetting The setting the user chose.
      */
     finishEdit: function(newPattern, newSetting) {
-      this.patternLabel.textContent = newPattern;
-      this.settingLabel.textContent = this.settingForDisplay();
+      this.patternLabel_.textContent = newPattern;
+      this.settingLabel_.textContent = this.settingForDisplay();
       var oldPattern = this.pattern;
       this.pattern = newPattern;
       this.setting = newSetting;
@@ -229,12 +229,12 @@ cr.define('pluginSettings.ui', function() {
      * Clear the <input> and let the placeholder text show again.
      */
     resetInput: function() {
-      this.input.value = '';
+      this.input_.value = '';
     },
 
     /** @inheritDoc */
     get hasBeenEdited() {
-      return this.input.value != '';
+      return this.input_.value != '';
     },
 
     /**
