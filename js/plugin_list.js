@@ -166,8 +166,9 @@ cr.define('pluginSettings.ui', function() {
       var sm = new ListSingleSelectionModel();
       sm.addEventListener('change', this.handleSelectionChange_.bind(this));
       this.selectionModel = sm;
-      this.infoNodes = {};
       this.autoExpands = true;
+      this.addEventListener('hasElementFocusChange',
+                            this.handleListFocusChange_);
     },
 
     /**
@@ -180,6 +181,7 @@ cr.define('pluginSettings.ui', function() {
 
     /**
      * Called when the selection changes.
+     * @private
      */
     handleSelectionChange_: function(ce) {
       ce.changes.forEach(function(change) {
@@ -196,6 +198,15 @@ cr.define('pluginSettings.ui', function() {
           }
         }
       }, this);
+    },
+
+    /**
+     * Called when the list gains or loses focus.
+     * @private
+     */
+    handleListFocusChange_: function(e) {
+      if (!this.hasElementFocus)
+        this.selectionModel.unselectAll();
     },
   };
 
