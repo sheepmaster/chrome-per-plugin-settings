@@ -71,13 +71,13 @@ cr.define('pluginSettings.ui', function() {
 
       var info = this.info_;
 
-      this.contentElement_ = this.ownerDocument.createElement('div');
-      this.appendChild(this.contentElement_);
+      var contentElement = this.ownerDocument.createElement('div');
 
       var nameEl = this.ownerDocument.createElement('div');
       nameEl.className = 'plugin-name';
       nameEl.textContent = info.description;
       nameEl.title = info.description;
+      contentElement.appendChild(nameEl);
 
       this.detailsElement_ = this.ownerDocument.createElement('div');
       this.detailsElement_.className = 'plugin-details hidden';
@@ -95,9 +95,9 @@ cr.define('pluginSettings.ui', function() {
       columnHeadersEl.appendChild(patternColumnEl);
       columnHeadersEl.appendChild(settingColumnEl);
       this.detailsElement_.appendChild(columnHeadersEl);
+      contentElement.appendChild(this.detailsElement_);
 
-      this.contentElement_.appendChild(nameEl);
-      this.contentElement_.appendChild(this.detailsElement_);
+      this.appendChild(contentElement);
 
       // Create the rule list asynchronously, to make sure that it is already
       // fully integrated in the DOM tree.
