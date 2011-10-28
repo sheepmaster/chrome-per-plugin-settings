@@ -80,6 +80,7 @@ cr.define('pluginSettings.ui', function() {
       nameEl.title = info.description;
       titleEl.appendChild(nameEl);
       this.numRulesEl_ = this.ownerDocument.createElement('span');
+      this.numRulesEl_.className = 'num-rules';
       titleEl.appendChild(this.numRulesEl_);
       contentElement.appendChild(titleEl);
 

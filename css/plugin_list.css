@@ -28,8 +28,12 @@ body {
   font-weight: bold;
 }
 
-.plugin-name:after {
+.num-rules:before {
   content: ' ';
+}
+
+.plugin-show-details .num-rules {
+  display: none;
 }
 
 .plugin-description {
