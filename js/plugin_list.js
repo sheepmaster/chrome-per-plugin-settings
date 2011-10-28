@@ -73,11 +73,15 @@ cr.define('pluginSettings.ui', function() {
 
       var contentElement = this.ownerDocument.createElement('div');
 
-      var nameEl = this.ownerDocument.createElement('div');
+      var titleEl = this.ownerDocument.createElement('div');
+      var nameEl = this.ownerDocument.createElement('span');
       nameEl.className = 'plugin-name';
       nameEl.textContent = info.description;
       nameEl.title = info.description;
-      contentElement.appendChild(nameEl);
+      titleEl.appendChild(nameEl);
+      this.numRulesEl_ = this.ownerDocument.createElement('span');
+      titleEl.appendChild(this.numRulesEl_);
+      contentElement.appendChild(titleEl);
 
       this.detailsElement_ = this.ownerDocument.createElement('div');
       this.detailsElement_.className = 'plugin-details hidden';
@@ -99,21 +103,30 @@ cr.define('pluginSettings.ui', function() {
 
       this.appendChild(contentElement);
 
+      var settings = new pluginSettings.Settings(this.info_.id);
+      this.updateRulesCount_(settings);
+      settings.addEventListener('change',
+                                this.updateRulesCount_.bind(this, settings));
+
       // Create the rule list asynchronously, to make sure that it is already
       // fully integrated in the DOM tree.
-      window.setTimeout(this.loadRules_.bind(this), 0);
+      window.setTimeout(this.loadRules_.bind(this, settings), 0);
     },
 
     /**
      * Create the list of content setting rules applying to this plug-in.
      * @private
      */
-    loadRules_: function() {
+    loadRules_: function(settings) {
       var rulesEl = this.ownerDocument.createElement('list');
       this.detailsElement_.appendChild(rulesEl);
 
       pluginSettings.ui.RuleList.decorate(rulesEl);
-      rulesEl.setPluginSettings(new pluginSettings.Settings(this.info_.id));
+      rulesEl.setPluginSettings(settings);
+    },
+
+    updateRulesCount_: function(settings) {
+      this.numRulesEl_.textContent = '(' + settings.getAll().length + ' rules)';
     },
 
     /**

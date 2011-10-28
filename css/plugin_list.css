@@ -28,6 +28,10 @@ body {
   font-weight: bold;
 }
 
+.plugin-name:after {
+  content: ' ';
+}
+
 .plugin-description {
   display: inline-block;
   -webkit-padding-start: 7px;
