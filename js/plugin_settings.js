@@ -28,20 +28,6 @@ cr.define('pluginSettings', function() {
     plugin_: null,
 
     /**
-     * Called when a transaction is finished.
-     * @param {?string} error The error message, if an error occurred.
-     *     Otherwise, this is null.
-     * @private
-     */
-    transactionFinished_: function(error) {
-      if (error)
-        $('error').textContent = 'Error: ' + error;
-      else
-        $('error').textContent = '';
-      cr.dispatchSimpleEvent(this, 'change');
-    },
-
-    /**
      * Clears all content settings, and recreates them from local storage. If a
      * content setting can't be set (which shouldn't really happen, as it has
      * been successfully set previously), it is removed from local storage as
@@ -95,10 +81,9 @@ cr.define('pluginSettings', function() {
      * @param {string} pattern The content setting pattern for the rule.
      * @param {string} setting The setting for the rule.
      * @param {function(?string)} callback Called when the content settings have
-     *     been updated.
-     * @private
+     *     been updated, or on error.
      */
-    setInternal_: function(pattern, setting, callback) {
+    set: function(pattern, setting, callback) {
       var plugin = this.plugin_;
       chrome.contentSettings.plugins.set({
           'primaryPattern': pattern,
@@ -110,63 +95,45 @@ cr.define('pluginSettings', function() {
         } else {
           window.localStorage.setItem(JSON.stringify([plugin, pattern]),
                                       setting);
-          callback(null);
+          callback();
         }
       });
-    },
-
-    /**
-     * Creates a content setting rule.
-     * @param {string} pattern The content setting pattern for the rule.
-     * @param {string} setting The setting for the rule.
-     */
-    set: function(pattern, setting) {
-      var settings = this;
-      this.setInternal_(pattern, setting, this.transactionFinished_.bind(this));
     },
 
     /**
      * Removes the content setting rule with a given pattern, and calls the
      *     passed in callback afterwards.
      * @param {string} pattern The content setting pattern for the rule.
-     * @param {function(?string)} callback Called when the content settings have
+     * @param {function()?} callback Called when the content settings have
      *     been updated.
-     * @private
      */
-    clearInternal_: function(pattern, callback) {
+    clear: function(pattern, callback) {
       window.localStorage.removeItem(
           JSON.stringify([this.plugin_, pattern]));
       this.recreateRules_(callback);
     },
 
     /**
-     * Removes the content setting rule with a given pattern.
-     * @param {string} pattern The content setting pattern for the rule.
-     */
-    clear: function(pattern) {
-      var settings = this;
-      this.clearInternal_(pattern, this.transactionFinished_.bind(this));
-    },
-
-    /**
      * Updates the content setting rule with a given pattern to a new pattern
-     *     and setting.
+     *     and setting and calls the passed in callback with the result.
      * @param {string} oldPattern The old content setting pattern for the rule.
      * @param {string} newPattern The new content setting pattern for the rule.
      * @param {string} setting The setting for the rule.
+     * @param {function(?string)} callback Called when the content settings have
+     *     been updated, or on error.
      */
-    update: function(oldPattern, newPattern, setting) {
+    update: function(oldPattern, newPattern, setting, callback) {
       if (oldPattern == newPattern) {
         // Avoid recreating all rules if only the setting changed.
-        this.set(newPattern, setting);
+        this.set(newPattern, setting, callback);
         return;
       }
       var oldSetting = this.get(oldPattern);
       var settings = this;
       // Remove the old rule.
-      this.clearInternal_(oldPattern, function() {
+      this.clear(oldPattern, function() {
         // Try to set the new rule.
-        settings.setInternal_(newPattern, setting, function(error) {
+        settings.set(newPattern, setting, function(error) {
           if (error) {
             // If setting the new rule failed, restore the old rule.
             settings.setInternal_(oldPattern, oldSetting,
@@ -175,10 +142,10 @@ cr.define('pluginSettings', function() {
                 console.error('Error restoring [' + settings.plugin_ + ', ' +
                               oldPattern + oldSetting + ']: ' + restoreError);
               }
-              settings.transactionFinished_(error);
+              callback(error);
             });
           } else {
-            settings.transactionFinished_();
+            callback();
           }
         });
       });

@@ -221,7 +221,8 @@ cr.define('pluginSettings.ui', function() {
       this.pattern = newPattern;
       this.setting = newSetting;
 
-      this.list_.settings.update(oldPattern, newPattern, newSetting);
+      this.list_.settings.update(oldPattern, newPattern, newSetting,
+                                 this.list_.settingsChangedCallback());
     }
   };
 
@@ -273,7 +274,8 @@ cr.define('pluginSettings.ui', function() {
      */
     finishEdit: function(newPattern, newSetting) {
       this.resetInput();
-      this.list_.settings.set(newPattern, newSetting);
+      this.list_.settings.set(newPattern, newSetting,
+                              this.list_.settingsChangedCallback());
     },
   };
 
@@ -333,10 +335,25 @@ cr.define('pluginSettings.ui', function() {
     },
 
     /**
-     * Called when the list of content setting rules changes.
+     * Called when the list of content setting rules has been changed.
+     * @param {?string} error The error message, if an error occurred.
+     *     Otherwise, this is null.
+     * @private
      */
-    handleSettingsChange_: function(e) {
+    settingsChanged_: function(error) {
+      if (error)
+        $('error').textContent = 'Error: ' + error;
+      else
+        $('error').textContent = '';
       this.setRules_(this.settings.getAll());
+    },
+
+    /**
+     * @return {function()} A bound callback to update the UI after the settings
+     *     have been changed.
+     */
+    settingsChangedCallback: function() {
+      return this.settingsChanged_.bind(this);
     },
 
     /**
@@ -345,9 +362,7 @@ cr.define('pluginSettings.ui', function() {
      */
     setPluginSettings: function(settings) {
       this.settings = settings;
-      this.setRules_(settings.getAll());
-      settings.addEventListener('change',
-                                this.handleSettingsChange_.bind(this));
+      this.settingsChanged_();
     },
 
     /**
@@ -364,7 +379,7 @@ cr.define('pluginSettings.ui', function() {
       if (listItem.undeletable)
         return;
 
-      this.settings.clear(listItem.pattern);
+      this.settings.clear(listItem.pattern, this.settingsChangedCallback());
     },
   };
 
