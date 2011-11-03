@@ -181,8 +181,6 @@ cr.define('pluginSettings.ui', function() {
       sm.addEventListener('change', this.handleSelectionChange_.bind(this));
       this.selectionModel = sm;
       this.autoExpands = true;
-      this.addEventListener('hasElementFocusChange',
-                            this.handleListFocusChange_);
     },
 
     /**
@@ -212,15 +210,6 @@ cr.define('pluginSettings.ui', function() {
           }
         }
       }, this);
-    },
-
-    /**
-     * Called when the list gains or loses focus.
-     * @private
-     */
-    handleListFocusChange_: function(e) {
-      if (!this.hasElementFocus)
-        this.selectionModel.unselectAll();
     },
   };
 
